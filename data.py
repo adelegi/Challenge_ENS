@@ -113,18 +113,23 @@ def features(outside_temp, building):
     
     N = len(outside_temp)
     features = None
-    keys = {}
-    column = 0
     
     hour = 0.0
     day = 1
     
     
     for i in range(N):
+
+        keys = {}
+        column = 0
         
-        feature = [outside_temp[i]]
+        feature = [outside_temp[i], day, hour]
         
         keys[column] = 'outside_temp'
+        column += 1
+        keys[column] = 'day'
+        column += 1
+        keys[column] = 'hour'
         column += 1
         
         week_end = (day in [6, 7]) 
@@ -260,6 +265,8 @@ def features(outside_temp, building):
                 
             print('ERRROR: {} differs from {}'.format(keys, previous_keys))
             break
+
+        previous_keys = keys
         
         # add feature
         if i == 0:
