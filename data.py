@@ -94,7 +94,11 @@ def load_output_data(file, outside_temp, building_dict):
         
         output_dico[building] = output.iloc[len_year*i:len_year*(i+1)].as_matrix()
     
-    output_dico['fields'] = 'office_temperature_degreC:Q_total_heating_kW:Q_total_AC_kW:Q_total_gains_kW:Q_total_kW'
+    output_dico['fields'] = {'office_temperature_degreC': 0,
+    					     'Q_total_heating_kW': 1,
+    					     'Q_total_AC_kW': 2,
+    					     'Q_total_gains_kW': 3,
+    					     'Q_total_kW': 4}
     
     return output_dico
 
