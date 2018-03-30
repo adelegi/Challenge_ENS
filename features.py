@@ -210,3 +210,17 @@ def load_data_features(file, features_names=None, remove_useless=True):
         X = np.concatenate((X, all_features[building][features_names]), axis=0)
 
     return X
+
+def choose_name_features(features, type_feature):
+
+    name_features = list(features[list(features.keys())[0]].keys())
+
+    types = ['', '_without_lever', '_non_int', '_without_lever_non_int']
+    variables = ['AC_on', 'AC_value', 'heating_on', 'heating_value']
+
+    for t in types:
+        if t != type_feature:
+            for var in variables:
+                name_features.remove(var + t)
+
+    return name_features
