@@ -38,6 +38,8 @@ class ModelLearning():
             output_var = list of the variables to load
         """
 
+        self.features_names = features_names
+
         if features_names is None:
             features_names = list(self.features[self.name_buildings[0]].columns)
     
@@ -152,9 +154,6 @@ class ModelLearning():
     def train_model_to_plot(self, name_output):
         self.name_output = name_output
         self.col_var = self.output['fields'][name_output]
-
-        # Fit model
-        self.fit_model(name_output)
 
         self.Y_pred = self.predict_model(self.model, self.X_test)
 

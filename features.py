@@ -119,13 +119,24 @@ def extract_features(dico, temp, name_building, print_info=True):
     if print_info:
         print("{} jours et {} semaines".format(nb_jours, nb_sem))
 
+    # Variable: day of the week
+    day = [[i]*24 for i in range(7)]
+    day = [item for sublist in day for item in sublist]
+    day = day*52
+
+    # Variable: number of the week
+    week = [[i]*7*24 for i in range(52)]
+    week = [item for sublist in week for item in sublist]
+
     features = {'outside_temp': temp,
-                'hour': list(range(24))*nb_jours}
+                'hour': list(range(24))*nb_jours,
+                'week_day': day,
+                'week': week}
 
     # -- Variantes --
     # Traite les 7h30 en mettant 50% de l'augmentation a 8h et tout a 9h par exemple
     treat_non_int_hours_dico(dico, name_building)
-    # enlever le palier de 24h a 0h
+    # Enlever le palier de 24h a 0h
     remove_lever_0_24_dico(dico, name_building)
 
 

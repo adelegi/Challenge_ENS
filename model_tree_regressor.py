@@ -18,4 +18,4 @@ class ModelTreeRegressor(ModelLearning):
 
     def predict_model(self, model, X):
         """ Return Y predicted by the model from X data """
-        return model.predict(X)
+        return self.model.predict(X)

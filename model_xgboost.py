@@ -1,5 +1,6 @@
 import numpy as np
 import xgboost as xgb
+from matplotlib import pyplot as plt
 
 from model_class import ModelLearning
 
@@ -20,4 +21,12 @@ class ModelXGBoost(ModelLearning):
 
     def predict_model(self, model, X):
         """ Return Y predicted by the model from X data """
-        return model.predict(X)
+        return self.model.predict(X)
+
+    def model_importance(self):
+        importance = self.model.feature_importances_
+        x = range(len(importance))
+        plt.bar(x, importance)
+        plt.xticks(x, self.features_names, rotation=90)
+        plt.title("Feature importance for the variable: '{}'".format(self.var))
+        plt.show()
