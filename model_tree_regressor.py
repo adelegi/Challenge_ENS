@@ -1,5 +1,5 @@
 """ Decision Tree for Regression by skleanr package """
-
+from matplotlib import pyplot as plt
 from sklearn.tree import DecisionTreeRegressor
 
 from model_class import ModelLearning
@@ -19,3 +19,11 @@ class ModelTreeRegressor(ModelLearning):
     def predict_model(self, model, X):
         """ Return Y predicted by the model from X data """
         return self.model.predict(X)
+
+    def model_importance(self):
+        importance = self.model.feature_importances_
+        x = range(len(importance))
+        plt.bar(x, importance)
+        plt.xticks(x, self.features_names, rotation=90)
+        plt.title("Feature importance for the variable: '{}'".format(self.var))
+        plt.show()

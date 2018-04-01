@@ -129,7 +129,7 @@ class ModelLearning():
 
         return results
 
-    def save_output(self, model_dico, file_save, X_val):
+    def save_output(self, model_dico=None, file_save, X_val):
         """ Save output predictions in the right format
               - model_dico: dictionary of the trained models for each output """
 
@@ -137,7 +137,7 @@ class ModelLearning():
 
         # Prediction
         for o in self.output_names:
-            pred[o] = self.predict_model(model_dico[o] , X_val)
+            pred[o] = self.predict_model(model_dico[o], X_val)
 
         # Text to save
         output_text = ':'.join(self.output_names)

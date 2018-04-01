@@ -9,14 +9,15 @@ class ModelXGBoost(ModelLearning):
     def __init__(self, features, output):
         ModelLearning.__init__(self, features, output)
 
-    def fit_model(self, var):
+    def fit_model(self, var, n_estimators=100, max_depth=3, min_child_weight=1, subsample=0.5):
         """ Fit the model to the train set """
 
         ModelLearning.fit_model(self, var)
 
         # Transform data to DGMatrix needed for xgboost
 
-        self.model = xgb.XGBRegressor(silent=False)
+        self.model = xgb.XGBRegressor(n_estimators=n_estimators, max_depth=max_depth,
+                                      min_child_weight=min_child_weight, subsample=subsample)
         self.model.fit(self.X_train , self.Y_train[:, self.col_var])
 
     def predict_model(self, model, X):

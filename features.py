@@ -13,8 +13,30 @@ def load_useless_varr():
             'AC_power_kW', 'heating_power_kW', 'surface_m2_GROU', 'surface_m2_ROOF',
             'surface_m2_INTW', 'PCs_percent_on_night_WE', 'light_percent_on_night_WE',
             'lighting_Wperm2', 'volume2capacitance_coeff', 'initial_temperature',
-            'Phantom_use_kW', 'AHU_low_threshold', 'AHU_high_threshold',  
+            'Phantom_use_kW', 'AHU_low_threshold', 'AHU_high_threshold', 
+            'AC_value_t_1', 'heating_value_t_1',
             'nb_PCs']  # nb_PCS == np_occupants
+
+def add_feature_evol_heating(all_features):
+    """ Nouvelle feature: Evolution du reglage de heating et AC (t-1) - t  """
+
+    for t in ['', '_non_int', '_without_lever', '_without_lever_non_int']:
+        for b in all_features:
+            # Heating value
+            decal = np.array(all_features[b]['heating_value' + t])
+            decal = np.hstack(([decal[0]], decal[:-1]))
+            all_features[b]['heating_value_t_1'] = decal
+            all_features[b]['heating_value_evol' + t] = all_features[b]['heating_value' + t]\
+                                                    - all_features[b]['heating_value_t_1']
+                
+            # AC value
+            decal = np.array(all_features[b]['AC_value' + t])
+            decal = np.hstack(([decal[0]], decal[:-1]))
+            all_features[b]['AC_value_t_1'] = decal
+            all_features[b]['AC_value_evol' + t] = all_features[b]['AC_value' + t]\
+                                               - all_features[b]['AC_value_t_1']
+        
+    return all_features
 
 
 def generate_a_day(hours, values, seuil_sup=10^6, seuil_inf=0):
@@ -187,6 +209,8 @@ def load_all_features(dico, temp, remove_useless=True):
     if remove_useless:
         all_features = remove_useless_features(dico, all_features)
 
+    all_features = add_feature_evol_heating(all_features)
+
     return all_features
 
 def remove_useless_features(dico, all_features):
@@ -227,7 +251,8 @@ def choose_name_features(features, type_feature):
     name_features = list(features[list(features.keys())[0]].keys())
 
     types = ['', '_without_lever', '_non_int', '_without_lever_non_int']
-    variables = ['AC_on', 'AC_value', 'heating_on', 'heating_value']
+    variables = ['AC_on', 'AC_value', 'heating_on', 'heating_value',
+                 'AC_value_evol', 'heating_value_evol']
 
     for t in types:
         if t != type_feature:
