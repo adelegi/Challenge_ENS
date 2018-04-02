@@ -14,18 +14,20 @@ import features
 from model_xgboost import ModelXGBoost
 
 
-def scores(model):
+def scores(model, do_print=True):
     # Test Score
     Y_pred = model.predict_model(model.model, model.X_test)
     mse = sklearn.metrics.mean_squared_error(model.Y_test[:, model.col_var], Y_pred)
-    print("MSE on test set:", mse)
+    if do_print:
+        print("MSE on test set:", mse)
 
     # Train score
     Y_pred_train = model.predict_model(model.model, model.X_train)
     mse_train = sklearn.metrics.mean_squared_error(model.Y_train[:, model.col_var], Y_pred_train)
-    print("MSE on train set:", mse_train)
+    if do_print:
+        print("MSE on train set:", mse_train)
     
-    return Y_pred
+    return mse, mse_train 
 
 def plot(model, n1, n2, plot_Y):
     plt.plot(plot_Y[n1:n2], label='prediction')
@@ -43,11 +45,11 @@ def test_xgboost(name_features, all_features, output, var,
 
     start_time = time.time()
     model.fit_model(var, n_estimators, max_depth, min_child_weight, subsample)
-    print("Execution time: {} min".format(round((time.time() - start_time)/60, 2)))
+    execution_time = time.time() - start_time
 
-    Y_pred = scores(model)
+    mse, mse_train = scores(model, do_print=False)
     
-    return model
+    return model, mse, mse_train, execution_time
 
 def predict_val(name_features, all_features, output, var, X_val,
                 n_estimators=100, max_depth=3, min_child_weight=1, subsample=0.5):
@@ -56,21 +58,37 @@ def predict_val(name_features, all_features, output, var, X_val,
     
     start_time = time.time()
     model.fit_model(var, n_estimators, max_depth, min_child_weight, subsample)
-    print("Execution time: {} min".format(round((time.time() - start_time)/60, 2)))
+    #print("Execution time: {} min".format(round((time.time() - start_time)/60, 2)))
     
     Y_pred = model.predict_model(model.model, X_val)
     
     return Y_pred
 
-def test_xgbppst(model, name_features, all_features, output,
-                 N, n_estimators_list, max_depth_list, do_print=False):
+def save_txt(file, txt):
+    with open(file, 'w') as f:
+            f.write(txt)
+
+def launch_several_tests(name_features, all_features, output,
+                         N, n_estimators_list, max_depth_list, do_print=False,
+                         file_save='./data/data_training.txt'):
+
+    data_txt = 'Variable:N:n_estimators:max_depth:MSE_train:MSE_test:execution_time\n'
+    save_txt(file_save, data_txt)
 
     for n_estimators in n_estimators_list:
         for max_depth in max_depth_list:
             for var in output['fields']:
                 for i in range(N):
-                    model = test_xgboost(name_features, all_features, output, var,
-                                         n_estimators, max_depth)
+                    # Train model to compute test MSE
+                    model, mse, mse_train, execution_time = test_xgboost(name_features, all_features,
+                                                                         output, var,
+                                                                         n_estimators, max_depth)
+                    # Save train / test MSE 
+                    data = [var, N, n_estimators, max_depth, mse_train, mse, execution_time]
+                    data = [str(x) for x in data]
+                    data_txt += ':'.join(data)
+                    data_txt += '\n'
+                    save_txt(file_save, data_txt)
                 
                 # Affichages
                 if do_print:
@@ -83,7 +101,7 @@ def test_xgbppst(model, name_features, all_features, output,
                 Y_pred_val = predict_val(name_features, all_features, output, var, X_val,
                                          n_estimators, max_depth)
 
-                name_svg = './data/Y_pred/Y_val_{}.pkl'.format(var + '_' + t + '_' + str(n_estimators) + str(max_depth))
+                name_svg = './data/Y_val_{}.pkl'.format(var + t + '_' + str(n_estimators) + '_' + str(max_depth))
                 pkl.dump(Y_pred_val, open(name_svg, 'wb'))
                 print("Prediction saved at " + name_svg)
 
@@ -93,6 +111,7 @@ if __name__ == '__main__':
     # Load features
     temp, dico = data.load_input_data('data/train_input.csv')
     output = data.load_output_data('data/challenge_output.csv', temp, dico)
+    print("Load features:")
     all_features = features.load_all_features(dico, temp, remove_useless=True)
 
     # Choose features
@@ -107,9 +126,11 @@ if __name__ == '__main__':
         name_features.remove(name)
 
     # Load X_val
+    print("Load X_val for prediction:")
     X_val = features.load_data_features('./data/test_input.csv', name_features, remove_useless=True)
 
-    n_estimators_list = [1000]
-    max_depth_list = [5, 10]
-    test_xgbppst(model, name_features, all_features, output,
-                 N, n_estimators_list, max_depth_list, do_print=False)
+    n_estimators_list = [100, 500, 1000]
+    max_depth_list = [3, 5, 10]
+    N = 1
+    launch_several_tests(name_features, all_features, output,
+                         N, n_estimators_list, max_depth_list, do_print=False)

@@ -18,7 +18,7 @@ class ModelTreeRegressor(ModelLearning):
 
     def predict_model(self, model, X):
         """ Return Y predicted by the model from X data """
-        return self.model.predict(X)
+        return model.predict(X)
 
     def model_importance(self):
         importance = self.model.feature_importances_
