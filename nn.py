@@ -46,7 +46,7 @@ for t in range(5):
 			mse = sklearn.metrics.mean_squared_error(y_hat, y_test)
 			pred.append(mse)
 
-			print('\n pred \n')
+			print('\n {} \n'.format(pred))
 
 		np.savetxt('data/model_{}_val{}.txt'.format(n, t), pred)
 
